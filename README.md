@@ -1,4 +1,6 @@
-# suprise-calendar
+# Surprise Calendar
+
+Live Demo: https://richnnl.github.io/SurpriseCalendar/
 
 This template should help get you started developing with Vue 3 in Vite.
 

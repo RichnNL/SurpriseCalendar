@@ -21,23 +21,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
         with:
-          node-version: 25
-          cache: 'npm'
-          
+          bun-version: latest
+
       - name: Install dependencies
-        run: npm ci
+        run: bun install
         
-      # Step 1: Run Unit Tests
-      # If this fails, the workflow stops here and won't deploy
       - name: Run Unit Tests
-        run: npm run test:unit
+        run: bun run test:unit
         
-      # Step 2: Build project
       - name: Build project
-        run: npm run build
+        run: bun run build
         # env:
         #   VITE_SUPABASE_URL: ""
         #   VITE_SUPABASE_ANON_KEY: ""

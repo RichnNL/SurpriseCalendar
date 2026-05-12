@@ -48,9 +48,9 @@ describe('Profile Store', () => {
 
     expect(store.profiles.length).toBe(2)
     // Check Date conversion
-    expect(store.profiles[0].created_at).toBeInstanceOf(Date)
+    expect(store.profiles[0]!.created_at).toBeInstanceOf(Date)
     
-    expect(store.activeProfile?.id).toBe('1')
+    expect(store.activeProfile!.id).toBe('1')
     expect(store.isLoading).toBe(false)
   })
 

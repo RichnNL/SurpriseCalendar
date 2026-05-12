@@ -294,6 +294,14 @@ watch(
     drawGrid()
   },
 )
+
+// Redraw if active profile changes (to update coloring of user's cells)
+watch(
+  () => profileStore.activeProfile?.id,
+  () => {
+    drawGrid()
+  }
+)
 </script>
 
 <template>

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useCalendarStore } from '../../stores/calendar'
 import { useProfileStore } from '../../stores/profile'
+import RevealOutcome from './components/RevealOutcome.vue'
 import SelectCalendarDropdown from './components/SelectCalendarDropdown.vue'
 import SurpriseCalendar from './components/SurpriseCalendar.vue'
 import SwitchProfileDropdown from './components/SwitchProfileDropdown.vue'
@@ -10,11 +11,41 @@ import UserProfileMenu from './components/UserProfileMenu.vue'
 const calendarStore = useCalendarStore()
 const profileStore = useProfileStore()
 
+const showOutcome = ref(true)
+
 const hasGuessLeft = computed(() => {
   if (!calendarStore.activeCalendar || !profileStore.activeProfile) return false
-  return !calendarStore.activeCells.some(c => c.selected_by === profileStore.activeProfile?.id)
+  return !calendarStore.activeCells.some((c) => c.selected_by === profileStore.activeProfile?.id)
 })
 
+const mySelectedCell = computed(() => {
+  if (!profileStore.activeProfile) return null
+  return calendarStore.activeCells.find((c) => c.selected_by === profileStore.activeProfile?.id)
+})
+
+const hasWon = computed(() => !!mySelectedCell.value?.prize_id)
+
+const prizeImageUrl = computed(() => {
+  if (!mySelectedCell.value) return null
+  const rawPrize = mySelectedCell.value.prizes as any
+  const prizeObj = Array.isArray(rawPrize) ? rawPrize[0] : rawPrize
+  return prizeObj?.image_url || null
+})
+
+const prizeName = computed(() => {
+  if (!mySelectedCell.value) return null
+  const rawPrize = mySelectedCell.value.prizes as any
+  const prizeObj = Array.isArray(rawPrize) ? rawPrize[0] : rawPrize
+  return prizeObj?.name || null
+})
+
+// Reset outcome component visibility whenever user context switches
+watch(
+  [() => calendarStore.activeCalendar?.id, () => profileStore.activeProfile?.id],
+  () => {
+    showOutcome.value = true
+  }
+)
 </script>
 
 <template>
@@ -24,11 +55,9 @@ const hasGuessLeft = computed(() => {
       <UserProfileMenu />
 
       <div class="header-actions">
-        <div v-if="calendarStore.activeCalendar" class="guess-status-container">
-          <div class="guess-status" :class="{ 'has-guess': hasGuessLeft }">
-            {{ hasGuessLeft ? '1 guess left!' : '0 guesses left' }}
-          </div>
-          <span v-if="hasGuessLeft" class="guess-hint">Double click to guess</span>
+        <div v-if="calendarStore.activeCalendar && hasGuessLeft" class="guess-status-container">
+          <div class="guess-status" :class="{ 'has-guess': hasGuessLeft }">1 guess left!</div>
+          <span class="guess-hint">Double click to guess</span>
         </div>
         <SwitchProfileDropdown />
         <SelectCalendarDropdown />
@@ -41,7 +70,16 @@ const hasGuessLeft = computed(() => {
         v-if="calendarStore.activeCalendar"
         :cell-count="calendarStore.activeCalendar.cell_count"
       />
-      <div v-else class="placeholder-content">
+
+      <RevealOutcome
+        v-if="calendarStore.activeCalendar && !hasGuessLeft && mySelectedCell && showOutcome"
+        :has-won="hasWon"
+        :prize-name="prizeName"
+        :prize-image-url="prizeImageUrl"
+        @close="showOutcome = false"
+      />
+
+      <div v-else-if="!calendarStore.activeCalendar" class="placeholder-content">
         <h2>No Calendar Selected</h2>
         <p>Select a calendar from the top right to begin.</p>
       </div>
@@ -96,7 +134,7 @@ const hasGuessLeft = computed(() => {
   font-size: 0.9rem;
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
 }
 

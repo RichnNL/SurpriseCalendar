@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Viewport } from 'pixi-viewport'
 import { Application, Graphics, Container, Sprite } from 'pixi.js'
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch, computed } from 'vue'
+import { supabase } from '../../../supabase'
 import { useCalendarStore } from '../../../stores/calendar'
 import { useProfileStore } from '../../../stores/profile'
 
@@ -16,6 +17,16 @@ let app: Application | null = null
 let viewport: Viewport | null = null
 let gridGraphics: Graphics | null = null
 let prizeContainer: Container | null = null
+// Let effects run via CSS overlay instead of Canvas now
+
+const profileStore = useProfileStore()
+
+const hasGuessLeft = computed(() => {
+  if (!calendarStore.activeCalendar || !profileStore.activeProfile) return false
+  return !calendarStore.activeCells.some((c) => c.selected_by === profileStore.activeProfile?.id)
+})
+
+const activeCellsMap = computed(() => new Map(calendarStore.activeCells.map((c) => [c.cell_number, c])))
 
 const CELL_SIZE = 30
 const CELL_GAP = 2
@@ -24,6 +35,7 @@ const TOTAL_SIZE = CELL_SIZE + CELL_GAP
 // For HTML Numbers Overlay
 const vpState = ref({ x: 0, y: 0, scale: 1 })
 const visibleCells = ref<{ index: number; x: number; y: number }[]>([])
+const revealingCellNumber = ref<number | null>(null)
 
 function updateVisibleCells() {
   if (!viewport || props.cellCount <= 0) return
@@ -120,6 +132,77 @@ async function initPixi() {
   prizeContainer = new Container()
   viewport.addChild(prizeContainer)
 
+  // Handle Cell Clicks (Double Click to guess)
+  let lastClickedCell = -1
+  let lastClickTime = 0
+
+  viewport.on('clicked', async (e) => {
+    if (!hasGuessLeft.value || !calendarStore.activeCalendar || !profileStore.activeProfile || !app) return
+
+    const worldX = e.world.x
+    const worldY = e.world.y
+
+    const cols = Math.ceil(Math.sqrt(props.cellCount))
+    const col = Math.floor(worldX / TOTAL_SIZE)
+    const row = Math.floor(worldY / TOTAL_SIZE)
+
+    // Check bounds
+    if (col < 0 || col >= cols || row < 0 || row * cols + col >= props.cellCount) return
+
+    const cellIndex = row * cols + col
+    const cellNumber = cellIndex + 1
+
+    const now = Date.now()
+    const isDoubleClick = cellNumber === lastClickedCell && now - lastClickTime < 350
+    
+    lastClickedCell = cellNumber
+    lastClickTime = now
+
+    if (!isDoubleClick) return // Only fire on double click
+
+    // Check if taken
+    const existing = activeCellsMap.value.get(cellNumber)
+    if (existing && existing.selected_by) return
+
+    // Trigger visual state for CSS flash
+    revealingCellNumber.value = cellNumber
+
+    try {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const token = sessionData.session?.access_token
+      if (!token) throw new Error('No auth token')
+
+      const baseUrl = import.meta.env.VITE_API_BASE_URL
+      const calendarId = calendarStore.activeCalendar.id
+
+      const response = await fetch(`${baseUrl}/calendar/${calendarId}/cell`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: profileStore.activeProfile.id,
+          cellNumber: cellNumber,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to select cell')
+      }
+      
+    } catch (err) {
+      console.error('Cell selection failed:', err)
+    } finally {
+      // Small timeout so the user can see the flash state even if API is very fast
+      setTimeout(() => {
+        if (revealingCellNumber.value === cellNumber) {
+          revealingCellNumber.value = null
+        }
+      }, 800)
+    }
+  })
+
   drawGrid()
 
   // Start zoomed in at the top-left of the calendar
@@ -132,14 +215,10 @@ async function initPixi() {
 
 function drawGrid() {
   if (!gridGraphics || props.cellCount <= 0) return
-  console.log({ cellcount: props.cellCount })
   const cols = Math.ceil(Math.sqrt(props.cellCount))
-  console.log({ cols: cols })
   const rows = Math.ceil(props.cellCount / cols)
 
   // Convert active cells to a Map of cell_number -> cell for O(1) lookup
-  const activeCellsMap = new Map(calendarStore.activeCells.map((c) => [c.cell_number, c]))
-  const profileStore = useProfileStore()
   const activeProfileId = profileStore.activeProfile?.id
 
   gridGraphics.clear()
@@ -165,7 +244,7 @@ function drawGrid() {
     const x = offsetX + col * TOTAL_SIZE
     const y = offsetY + row * TOTAL_SIZE
 
-    const cell = activeCellsMap.get(i + 1)
+    const cell = activeCellsMap.value.get(i + 1)
     let color = 0xff6b00 // Default secondary color (Available)
 
     if (cell) {
@@ -252,6 +331,7 @@ watch(
         v-for="cell in visibleCells"
         :key="cell.index"
         class="cell-number"
+        :class="{ 'is-revealing': revealingCellNumber === cell.index + 1 }"
         :style="{ left: cell.x + 'px', top: cell.y + 'px' }"
       >
         {{ cell.index + 1 }}
@@ -303,6 +383,30 @@ watch(
   color: rgba(0, 0, 0, 0.6);
   font-family: sans-serif;
   user-select: none;
+  box-sizing: border-box;
+  transition: background-color 0.3s ease;
+}
+
+.cell-number.is-revealing {
+  background-color: white;
+  animation: cell-pulse 0.8s infinite alternate ease-in-out;
+  color: transparent; /* hide number while pulsing maybe? or keep it visible. Transparent makes flash look cleaner */
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  z-index: 10;
+}
+
+@keyframes cell-pulse {
+  0% {
+    opacity: 0.3;
+    background-color: #ffffff;
+    box-shadow: 0 0 4px #ffffff;
+  }
+  100% {
+    opacity: 1;
+    background-color: var(--color-secondary, #ff6b00);
+    box-shadow: 0 0 15px var(--color-secondary, #ff6b00);
+  }
 }
 
 .empty-state {

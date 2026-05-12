@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useCalendarStore } from '../../stores/calendar'
 import { useProfileStore } from '../../stores/profile'
 import RevealOutcome from './components/RevealOutcome.vue'
@@ -10,6 +10,8 @@ import UserProfileMenu from './components/UserProfileMenu.vue'
 
 const calendarStore = useCalendarStore()
 const profileStore = useProfileStore()
+
+const showOutcome = ref(true)
 
 const hasGuessLeft = computed(() => {
   if (!calendarStore.activeCalendar || !profileStore.activeProfile) return false
@@ -36,6 +38,14 @@ const prizeName = computed(() => {
   const prizeObj = Array.isArray(rawPrize) ? rawPrize[0] : rawPrize
   return prizeObj?.name || null
 })
+
+// Reset outcome component visibility whenever user context switches
+watch(
+  [() => calendarStore.activeCalendar?.id, () => profileStore.activeProfile?.id],
+  () => {
+    showOutcome.value = true
+  }
+)
 </script>
 
 <template>
@@ -62,10 +72,11 @@ const prizeName = computed(() => {
       />
 
       <RevealOutcome
-        v-if="calendarStore.activeCalendar && !hasGuessLeft && mySelectedCell"
+        v-if="calendarStore.activeCalendar && !hasGuessLeft && mySelectedCell && showOutcome"
         :has-won="hasWon"
         :prize-name="prizeName"
         :prize-image-url="prizeImageUrl"
+        @close="showOutcome = false"
       />
 
       <div v-else-if="!calendarStore.activeCalendar" class="placeholder-content">

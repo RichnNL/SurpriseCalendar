@@ -6,11 +6,20 @@ const props = defineProps<{
   prizeName?: string | null
   prizeImageUrl?: string | null
 }>()
+
+defineEmits<{
+  (e: 'close'): void
+}>()
 </script>
 
 <template>
   <div class="reveal-overlay" :class="{ 'is-win': props.hasWon, 'is-lose': !props.hasWon }">
     <div class="reveal-card">
+      <!-- Close Button -->
+      <button class="close-button" @click="$emit('close')" aria-label="Close reveal">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+
       <!-- Animated Background Layer -->
       <div class="glow-layer"></div>
 
@@ -72,6 +81,29 @@ const props = defineProps<{
   align-items: center;
   animation: slide-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   transform-origin: top center;
+}
+
+.close-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+  width: 2.5rem;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
 }
 
 /* The glowing core/backing */

@@ -17,10 +17,11 @@ Create a file named .env.local in the root directory.
 Add the following variables, pasting the key from the email into the second line:
 VITE_SUPABASE_ANON_KEY key be supabase key in email
 
-Code snippet
+```
 VITE_SUPABASE_URL=https://cmagqrxxdatyxydbkfcj.supabase.co
 VITE_SUPABASE_ANON_KEY=pasted_key_from_your_email_
 VITE_API_BASE_URL=https://localhost:7201
+```
 
 🛠️ Project Setup
 Installation

@@ -1,56 +1,54 @@
-# Surprise Calendar
-
+Surprise Calendar (Frontend)
 Live Demo: https://richnnl.github.io/SurpriseCalendar/
 
-This template should help get you started developing with Vue 3 in Vite.
+This is a Vue 3 application built with Vite, serving as the interface for the Surprise Calendar ecosystem.
 
-## Recommended IDE Setup
+🚀 Getting Started
+Prerequisites
+This project uses Bun for package management and execution. Ensure you have Bun installed on your machine.
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+Environment Configuration
+The application requires a connection to Supabase to function correctly.
 
-## Recommended Browser Setup
+Note on credentials: You should have received an email containing the Supabase Key. This key must be used for the VITE_SUPABASE_ANON_KEY variable.
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+Create a file named .env.local in the root directory.
 
-## Type Support for `.vue` Imports in TS
+Add the following variables, pasting the key from the email into the second line:
+VITE_SUPABASE_ANON_KEY key be supabase key in email
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+Code snippet
+VITE_SUPABASE_URL=https://cmagqrxxdatyxydbkfcj.supabase.co
+VITE_SUPABASE_ANON_KEY=pasted_key_from_your_email_
+VITE_API_BASE_URL=https://localhost:7201
 
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
+🛠️ Project Setup
+Installation
+Bash
 bun install
-```
+Development
+Start the local development server with hot-reload:
 
-### Compile and Hot-Reload for Development
-
-```sh
+Bash
 bun dev
-```
+Production Build
+Type-check, compile, and minify for production:
 
-### Type-Check, Compile and Minify for Production
-
-```sh
+Bash
 bun run build
-```
+🧪 Testing & Quality
+Unit Testing
+This project uses Vitest for unit testing.
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
-
-```sh
+Bash
 bun test:unit
-```
+Linting
+To maintain code quality using ESLint:
 
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
+Bash
 bun lint
-```
+💻 Recommended Setup
+IDE
+VS Code + Vue (Official) extension.
+
+Note: Disable the Vetur extension to avoid conflicts.

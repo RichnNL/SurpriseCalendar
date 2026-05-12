@@ -2,6 +2,7 @@
 import UserProfileMenu from './components/UserProfileMenu.vue'
 import SwitchProfileDropdown from './components/SwitchProfileDropdown.vue'
 import SelectCalendarDropdown from './components/SelectCalendarDropdown.vue'
+import DummyWeatherButton from './components/DummyWeatherButton.vue'
 </script>
 
 <template>
@@ -11,6 +12,7 @@ import SelectCalendarDropdown from './components/SelectCalendarDropdown.vue'
       <UserProfileMenu />
       
       <div class="header-actions">
+        <DummyWeatherButton />
         <SwitchProfileDropdown />
         <SelectCalendarDropdown />
       </div>

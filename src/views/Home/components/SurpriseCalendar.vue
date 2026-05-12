@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { Viewport } from 'pixi-viewport'
-import { Application, Graphics } from 'pixi.js'
+import { Application, Graphics, Container, Sprite } from 'pixi.js'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useCalendarStore } from '../../../stores/calendar'
+import { useProfileStore } from '../../../stores/profile'
 
 const props = defineProps<{
   cellCount: number
@@ -14,6 +15,7 @@ const containerRef = ref<HTMLElement | null>(null)
 let app: Application | null = null
 let viewport: Viewport | null = null
 let gridGraphics: Graphics | null = null
+let prizeContainer: Container | null = null
 
 const CELL_SIZE = 30
 const CELL_GAP = 2
@@ -21,11 +23,11 @@ const TOTAL_SIZE = CELL_SIZE + CELL_GAP
 
 // For HTML Numbers Overlay
 const vpState = ref({ x: 0, y: 0, scale: 1 })
-const visibleCells = ref<{ index: number, x: number, y: number }[]>([])
+const visibleCells = ref<{ index: number; x: number; y: number }[]>([])
 
 function updateVisibleCells() {
   if (!viewport || props.cellCount <= 0) return
-  
+
   // Only show numbers if zoomed in enough (e.g. scale > 0.8) to prevent DOM bloat
   if (viewport.scale.x < 0.6) {
     visibleCells.value = []
@@ -61,12 +63,12 @@ function updateVisibleCells() {
         newCells.push({
           index,
           x: offsetX + c * TOTAL_SIZE,
-          y: offsetY + r * TOTAL_SIZE
+          y: offsetY + r * TOTAL_SIZE,
         })
       }
     }
   }
-  
+
   // Safety cap to prevent browser freeze
   if (newCells.length < 3000) {
     visibleCells.value = newCells
@@ -102,10 +104,10 @@ async function initPixi() {
 
   // Enable interaction
   viewport.drag().pinch().wheel().decelerate()
-  
+
   // Don't allow zooming out too far or zooming in too close
   viewport.clampZoom({ minScale: 1, maxScale: 10 })
-  
+
   // Sync HTML overlay
   viewport.on('moved', () => {
     vpState.value = { x: viewport!.x, y: viewport!.y, scale: viewport!.scale.x }
@@ -115,26 +117,36 @@ async function initPixi() {
   gridGraphics = new Graphics()
   viewport.addChild(gridGraphics)
 
+  prizeContainer = new Container()
+  viewport.addChild(prizeContainer)
+
   drawGrid()
 
   // Start zoomed in at the top-left of the calendar
   viewport.setZoom(5)
   viewport.moveCorner(0, 0)
-  
+
   // Prevent panning way off the grid
   viewport.clamp({ direction: 'all' })
 }
 
 function drawGrid() {
   if (!gridGraphics || props.cellCount <= 0) return
-
+  console.log({ cellcount: props.cellCount })
   const cols = Math.ceil(Math.sqrt(props.cellCount))
+  console.log({ cols: cols })
   const rows = Math.ceil(props.cellCount / cols)
 
-  // Convert active cells to a Set of cell_numbers for O(1) lookup
-  const activeIndices = new Set(calendarStore.activeCells.map((c) => c.cell_number))
+  // Convert active cells to a Map of cell_number -> cell for O(1) lookup
+  const activeCellsMap = new Map(calendarStore.activeCells.map((c) => [c.cell_number, c]))
+  const profileStore = useProfileStore()
+  const activeProfileId = profileStore.activeProfile?.id
 
   gridGraphics.clear()
+  if (prizeContainer) {
+    // Clear old sprites before redrawing to prevent memory leaks
+    prizeContainer.removeChildren().forEach(child => child.destroy())
+  }
 
   // Start the grid at (0,0) so the viewport clamp bounds align perfectly
   const offsetX = 0
@@ -153,13 +165,47 @@ function drawGrid() {
     const x = offsetX + col * TOTAL_SIZE
     const y = offsetY + row * TOTAL_SIZE
 
-    // Assuming cell_number is 1-indexed in the database
-    const isGreen = activeIndices.has(i + 1)
+    const cell = activeCellsMap.get(i + 1)
+    let color = 0xff6b00 // Default secondary color (Available)
+
+    if (cell) {
+      if (cell.selected_by === activeProfileId) {
+        color = 0x22c55e // Green (My cells)
+      } else {
+        color = 0x555555 // Gray (Other people's cells)
+      }
+    }
 
     gridGraphics.rect(x, y, CELL_SIZE, CELL_SIZE)
-    gridGraphics.fill(isGreen ? 0x22c55e : 0xFF6B00)
+    gridGraphics.fill(color)
   }
-  
+
+  // Draw prize images for active cells that have a prize_id and image_url
+  if (prizeContainer) {
+    for (const cell of calendarStore.activeCells) {
+      if (cell.prizes?.image_url) {
+        // Calculate the cell's physical position
+        const index = cell.cell_number - 1
+        const col = index % cols
+        const row = Math.floor(index / cols)
+        
+        const cellX = offsetX + col * TOTAL_SIZE
+        const cellY = offsetY + row * TOTAL_SIZE
+        
+        // Create Sprite from the prize image URL
+        const sprite = Sprite.from(cell.prizes.image_url)
+        
+        // Scale it down (20x20 inside the 30x30 cell) and center it
+        sprite.width = 20
+        sprite.height = 20
+        sprite.x = cellX + 5
+        sprite.y = cellY + 5
+        
+        prizeContainer.addChild(sprite)
+      }
+    }
+  }
+
   // Initial overlay sync
   if (viewport) {
     vpState.value = { x: viewport.x, y: viewport.y, scale: viewport.scale.x }
@@ -198,14 +244,14 @@ watch(
 <template>
   <div class="calendar-container" ref="containerRef" v-if="props.cellCount > 0">
     <!-- LOD HTML Overlay that scales and translates identically to the Pixi Viewport -->
-    <div 
-      class="numbers-overlay" 
+    <div
+      class="numbers-overlay"
       :style="{ transform: `translate(${vpState.x}px, ${vpState.y}px) scale(${vpState.scale})` }"
     >
-      <div 
-        v-for="cell in visibleCells" 
-        :key="cell.index" 
-        class="cell-number" 
+      <div
+        v-for="cell in visibleCells"
+        :key="cell.index"
+        class="cell-number"
         :style="{ left: cell.x + 'px', top: cell.y + 'px' }"
       >
         {{ cell.index + 1 }}
@@ -249,7 +295,7 @@ watch(
   height: 30px;
   display: flex;
   justify-content: flex-end; /* Align right */
-  align-items: flex-start;   /* Align top */
+  align-items: flex-start; /* Align top */
   padding-top: 3px;
   padding-right: 3px;
   font-size: 8px; /* Base font size, viewport scales it naturally */

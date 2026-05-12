@@ -7,18 +7,6 @@ import UserProfileMenu from './components/UserProfileMenu.vue'
 
 const calendarStore = useCalendarStore()
 
-function loadDummyCalendar() {
-  calendarStore.setActiveCalendar({
-    id: 'dummy-1',
-    name: '100k Test Calendar',
-    cell_count: 100000,
-    prizes_count: 10,
-    created_by: 'dummy-user',
-    created_at: new Date(),
-    creator_username: 'Dummy Tester',
-    selected_cells_count: 0,
-  })
-}
 </script>
 
 <template>
@@ -28,20 +16,6 @@ function loadDummyCalendar() {
       <UserProfileMenu />
 
       <div class="header-actions">
-        <button
-          @click="loadDummyCalendar"
-          style="
-            background: transparent;
-            color: var(--color-primary);
-            border: 1px solid var(--color-border);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 500;
-          "
-        >
-          Test 100k Grid
-        </button>
         <SwitchProfileDropdown />
         <SelectCalendarDropdown />
       </div>

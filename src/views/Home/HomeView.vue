@@ -24,8 +24,11 @@ const hasGuessLeft = computed(() => {
       <UserProfileMenu />
 
       <div class="header-actions">
-        <div v-if="calendarStore.activeCalendar" class="guess-status" :class="{ 'has-guess': hasGuessLeft }">
-          {{ hasGuessLeft ? '1 guess left!' : '0 guesses left' }}
+        <div v-if="calendarStore.activeCalendar" class="guess-status-container">
+          <div class="guess-status" :class="{ 'has-guess': hasGuessLeft }">
+            {{ hasGuessLeft ? '1 guess left!' : '0 guesses left' }}
+          </div>
+          <span v-if="hasGuessLeft" class="guess-hint">Double click to guess</span>
         </div>
         <SwitchProfileDropdown />
         <SelectCalendarDropdown />
@@ -95,6 +98,20 @@ const hasGuessLeft = computed(() => {
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 16px rgba(0,0,0,0.3);
   transition: all 0.3s ease;
+}
+
+.guess-status-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.guess-hint {
+  color: white;
+  font-weight: bold;
+  font-size: 0.75rem;
+  text-transform: uppercase;
 }
 
 .guess-status.has-guess {

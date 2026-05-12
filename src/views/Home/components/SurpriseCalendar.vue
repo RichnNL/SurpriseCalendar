@@ -259,31 +259,7 @@ function drawGrid() {
     gridGraphics.fill(color)
   }
 
-  // Draw prize images for active cells that have a prize_id and image_url
-  if (prizeContainer) {
-    for (const cell of calendarStore.activeCells) {
-      if (cell.prizes?.image_url) {
-        // Calculate the cell's physical position
-        const index = cell.cell_number - 1
-        const col = index % cols
-        const row = Math.floor(index / cols)
-        
-        const cellX = offsetX + col * TOTAL_SIZE
-        const cellY = offsetY + row * TOTAL_SIZE
-        
-        // Create Sprite from the prize image URL
-        const sprite = Sprite.from(cell.prizes.image_url)
-        
-        // Scale it down (20x20 inside the 30x30 cell) and center it
-        sprite.width = 20
-        sprite.height = 20
-        sprite.x = cellX + 5
-        sprite.y = cellY + 5
-        
-        prizeContainer.addChild(sprite)
-      }
-    }
-  }
+
 
   // Initial overlay sync
   if (viewport) {

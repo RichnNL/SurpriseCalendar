@@ -34,6 +34,7 @@ export interface CellRow {
   cell_number: number
   selected_by: string | null
   prize_id: string | null
+  prizes?: { id: string; image_url: string } | null
 }
 
 export const useCalendarStore = defineStore('calendar', () => {
@@ -87,7 +88,10 @@ export const useCalendarStore = defineStore('calendar', () => {
     try {
       const { data, error } = await supabase
         .from('cells')
-        .select('*')
+        .select(`
+          *,
+          prizes ( id, image_url )
+        `)
         .eq('calendar_id', calendarId)
         .order('cell_number', { ascending: true })
         .returns<CellRow[]>()

@@ -6,6 +6,7 @@ import AuthHeader from '../../components/AuthHeader.vue'
 
 import LoginEmailInput from './components/LoginEmailInput.vue'
 import LoginPasswordInput from './components/LoginPasswordInput.vue'
+import LoginSubmitButton from './components/LoginSubmitButton.vue'
 
 const router = useRouter()
 const email = ref('')
@@ -46,9 +47,7 @@ async function handleLogin() {
 
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
 
-        <button type="submit" :disabled="loading">
-          {{ loading ? 'Signing in...' : 'Sign In' }}
-        </button>
+        <LoginSubmitButton :loading="loading" />
       </form>
 
       <div style="text-align: center; margin-top: 2rem;">

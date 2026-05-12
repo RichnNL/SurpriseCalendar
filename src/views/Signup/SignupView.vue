@@ -8,6 +8,7 @@ import SignupUsernameInput from './components/SignupUsernameInput.vue'
 import SignupEmailInput from './components/SignupEmailInput.vue'
 import SignupPasswordInput from './components/SignupPasswordInput.vue'
 import SignupAgeCheckbox from './components/SignupAgeCheckbox.vue'
+import SignupSubmitButton from './components/SignupSubmitButton.vue'
 
 const router = useRouter()
 const username = ref('')
@@ -129,9 +130,7 @@ async function handleSignUp() {
 
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
 
-        <button type="submit" :disabled="loading || !isFormValid" :style="{ opacity: (!isFormValid || loading) ? 0.5 : 1, cursor: (!isFormValid || loading) ? 'not-allowed' : 'pointer' }">
-          {{ loading ? 'Creating account...' : 'Sign Up' }}
-        </button>
+        <SignupSubmitButton :loading="loading" :isFormValid="isFormValid" />
       </form>
 
       <div style="text-align: center; margin-top: 2rem;">

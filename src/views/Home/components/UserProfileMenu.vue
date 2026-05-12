@@ -17,7 +17,7 @@ async function handleSignOut() {
   <div class="user-menu-container">
     <div class="user-info" @click="isProfileMenuOpen = !isProfileMenuOpen">
       <img src="../../../assets/avatar.png" alt="User Avatar" class="avatar" />
-      <span class="greeting">Hello, {{ authStore.user?.user_metadata?.username || 'User' }}</span>
+      <span class="greeting">Hello, {{ authStore.user?.email || 'User' }}</span>
     </div>
     
     <div v-if="isProfileMenuOpen" class="profile-dropdown">

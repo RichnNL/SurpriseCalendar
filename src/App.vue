@@ -1,12 +1,26 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, watch } from 'vue'
 import { RouterView } from 'vue-router'
 import { useAuthStore } from './stores/auth'
+import { useProfileStore } from './stores/profile'
 
 const authStore = useAuthStore()
+const profileStore = useProfileStore()
 
-onMounted(() => {
-  authStore.initialize()
+onMounted(async () => {
+  await authStore.initialize()
+  if (authStore.user) {
+    await profileStore.fetchProfiles()
+  }
+})
+
+watch(() => authStore.user, (newUser) => {
+  if (newUser) {
+    profileStore.fetchProfiles()
+  } else {
+    profileStore.profiles = []
+    profileStore.activeProfile = null
+  }
 })
 </script>
 

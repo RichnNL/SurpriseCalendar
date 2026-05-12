@@ -1,11 +1,14 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useCalendarStore, type Calendar } from '../../../stores/calendar'
+import CreateCalendarModal from './CreateCalendarModal.vue'
 
 const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
 const calendarStore = useCalendarStore()
+const isCreating = ref(false)
 
 function selectCalendar(calendar: Calendar) {
   calendarStore.setActiveCalendar(calendar)
@@ -20,9 +23,11 @@ function isGameOver(calendar: Calendar) {
 <template>
   <div class="modal-overlay" @click.self="$emit('close')">
     <div class="modal-content auth-card" style="margin: 0; max-width: 500px; width: 90%; max-height: 80vh; display: flex; flex-direction: column;">
-      <h2 style="color: var(--color-text); text-align: center; margin-bottom: 1.5rem;">Select Calendar</h2>
       
-      <div v-if="calendarStore.isLoading" style="text-align: center; padding: 2rem; color: var(--color-text-muted);">
+      <template v-if="!isCreating">
+        <h2 style="color: var(--color-text); text-align: center; margin-bottom: 1.5rem;">Select Calendar</h2>
+        
+        <div v-if="calendarStore.isLoading" style="text-align: center; padding: 2rem; color: var(--color-text-muted);">
         Loading calendars...
       </div>
       
@@ -46,9 +51,13 @@ function isGameOver(calendar: Calendar) {
         </div>
       </div>
 
-      <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
-        <button type="button" @click="$emit('close')" style="background: transparent; border: 1px solid var(--color-border); color: var(--color-text); width: auto; padding: 0.5rem 1.5rem;">Close</button>
+      <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+        <button type="button" @click="isCreating = true" class="btn-create-nav">+ Create new calendar</button>
+        <button type="button" @click="$emit('close')" class="btn-close">Close</button>
       </div>
+      </template>
+
+      <CreateCalendarModal v-else @back="isCreating = false" @close="$emit('close')" />
     </div>
   </div>
 </template>
@@ -147,5 +156,32 @@ function isGameOver(calendar: Calendar) {
   background-color: rgba(255, 77, 79, 0.2);
   color: #ff4d4f;
   border: 1px solid rgba(255, 77, 79, 0.4);
+}
+
+.btn-close {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  width: auto;
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-close:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.btn-create-nav {
+  background: transparent;
+  border: none;
+  color: var(--color-secondary);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.btn-create-nav:hover {
+  text-decoration: underline;
 }
 </style>

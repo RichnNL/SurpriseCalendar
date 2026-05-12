@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { supabase } from '../../../supabase'
 import { useProfileStore } from '../../../stores/profile'
+import { supabase } from '../../../supabase'
 
 const emit = defineEmits<{
   (e: 'close'): void
@@ -64,10 +64,9 @@ async function submitCalendar() {
       },
       body: JSON.stringify({
         UserId: profileStore.activeProfile.id,
-        CalendarName: newCalendarName.value.trim()
-      })
+        CalendarName: newCalendarName.value.trim(),
+      }),
     })
-    console.log(response)
     if (!response.ok) {
       const txt = await response.text()
       throw new Error(txt || `HTTP error: ${response.status}`)
@@ -76,7 +75,6 @@ async function submitCalendar() {
     // Success, go back to list
     emit('back')
   } catch (error: any) {
-    console.log(error);
     console.error('Create calendar error:', error)
     errorMsg.value = error.message
   } finally {
@@ -87,32 +85,40 @@ async function submitCalendar() {
 
 <template>
   <div class="create-container">
-    <h2 style="color: var(--color-text); text-align: center; margin-bottom: 1.5rem;">Create New Calendar</h2>
-    
+    <h2 style="color: var(--color-text); text-align: center; margin-bottom: 1.5rem">
+      Create New Calendar
+    </h2>
+
     <form @submit.prevent="submitCalendar" class="create-form">
       <div class="input-group">
         <label for="calendarName">Calendar Name</label>
-        <input 
+        <input
           id="calendarName"
-          v-model="newCalendarName" 
-          type="text" 
-          placeholder="e.g. My Awesome Calendar" 
+          v-model="newCalendarName"
+          type="text"
+          placeholder="e.g. My Awesome Calendar"
           required
           :disabled="isSubmitting"
         />
-        <div style="min-height: 20px; margin-top: 0.25rem;">
+        <div style="min-height: 20px; margin-top: 0.25rem">
           <span v-if="isChecking" class="status-text checking">Checking availability...</span>
-          <span v-else-if="isAvailable === true" class="status-text success">Name is available!</span>
-          <span v-else-if="isAvailable === false" class="status-text error">This name is already taken.</span>
+          <span v-else-if="isAvailable === true" class="status-text success"
+            >Name is available!</span
+          >
+          <span v-else-if="isAvailable === false" class="status-text error"
+            >This name is already taken.</span
+          >
         </div>
       </div>
 
       <div v-if="errorMsg" class="error-msg">{{ errorMsg }}</div>
 
       <div class="form-actions">
-        <button type="button" class="btn-cancel" @click="$emit('back')" :disabled="isSubmitting">Cancel</button>
-        <button 
-          type="submit" 
+        <button type="button" class="btn-cancel" @click="$emit('back')" :disabled="isSubmitting">
+          Cancel
+        </button>
+        <button
+          type="submit"
           class="btn-submit auth-button"
           :disabled="isSubmitting || isChecking || !isAvailable || !newCalendarName.trim()"
         >
@@ -163,9 +169,15 @@ async function submitCalendar() {
 .status-text {
   font-size: 0.85rem;
 }
-.checking { color: var(--color-text-muted); }
-.success { color: #52c41a; }
-.error { color: #ff4d4f; }
+.checking {
+  color: var(--color-text-muted);
+}
+.success {
+  color: #52c41a;
+}
+.error {
+  color: #ff4d4f;
+}
 
 .error-msg {
   padding: 0.75rem;

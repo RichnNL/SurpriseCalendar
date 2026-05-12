@@ -18,6 +18,8 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.105.4",
     "pinia": "^3.0.4",
+    "pixi-viewport": "^6.0.3",
+    "pixi.js": "^8.18.1",
     "vue": "^3.5.32",
     "vue-router": "^5.0.4"
   },

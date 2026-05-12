@@ -1,7 +1,24 @@
 <script setup lang="ts">
-import UserProfileMenu from './components/UserProfileMenu.vue'
-import SwitchProfileDropdown from './components/SwitchProfileDropdown.vue'
+import { useCalendarStore } from '../../stores/calendar'
 import SelectCalendarDropdown from './components/SelectCalendarDropdown.vue'
+import SurpriseCalendar from './components/SurpriseCalendar.vue'
+import SwitchProfileDropdown from './components/SwitchProfileDropdown.vue'
+import UserProfileMenu from './components/UserProfileMenu.vue'
+
+const calendarStore = useCalendarStore()
+
+function loadDummyCalendar() {
+  calendarStore.setActiveCalendar({
+    id: 'dummy-1',
+    name: '100k Test Calendar',
+    cell_count: 100000,
+    prizes_count: 10,
+    created_by: 'dummy-user',
+    created_at: new Date(),
+    creator_username: 'Dummy Tester',
+    selected_cells_count: 0,
+  })
+}
 </script>
 
 <template>
@@ -9,8 +26,22 @@ import SelectCalendarDropdown from './components/SelectCalendarDropdown.vue'
     <!-- Top Row: User Profile & Calendar Selection -->
     <header class="top-row">
       <UserProfileMenu />
-      
+
       <div class="header-actions">
+        <button
+          @click="loadDummyCalendar"
+          style="
+            background: transparent;
+            color: var(--color-primary);
+            border: 1px solid var(--color-border);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+          "
+        >
+          Test 100k Grid
+        </button>
         <SwitchProfileDropdown />
         <SelectCalendarDropdown />
       </div>
@@ -18,19 +49,15 @@ import SelectCalendarDropdown from './components/SelectCalendarDropdown.vue'
 
     <!-- Main Calendar Area -->
     <main class="calendar-area">
-      <div class="placeholder-content">
-        <h2>Calendar View</h2>
-        <p>Main calendar placeholder. Takes up most of the screen.</p>
+      <SurpriseCalendar
+        v-if="calendarStore.activeCalendar"
+        :cell-count="calendarStore.activeCalendar.cell_count"
+      />
+      <div v-else class="placeholder-content">
+        <h2>No Calendar Selected</h2>
+        <p>Select a calendar from the top right to begin.</p>
       </div>
     </main>
-
-    <!-- Bottom Minimap Area -->
-    <footer class="minimap-area">
-      <div class="placeholder-content minimap-placeholder">
-        <h3>Minimap</h3>
-        <p>20% of the bottom</p>
-      </div>
-    </footer>
   </div>
 </template>
 
@@ -56,14 +83,11 @@ import SelectCalendarDropdown from './components/SelectCalendarDropdown.vue'
   z-index: 10;
 }
 
-
 .header-actions {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
-
-
 
 /* Main Calendar Area */
 .calendar-area {
@@ -71,9 +95,8 @@ import SelectCalendarDropdown from './components/SelectCalendarDropdown.vue'
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
-  overflow-y: auto;
   position: relative;
+  overflow: hidden; /* Important for TresJS canvas bounds */
 }
 
 .calendar-area .placeholder-content {
@@ -84,32 +107,6 @@ import SelectCalendarDropdown from './components/SelectCalendarDropdown.vue'
   color: var(--color-text-muted);
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-/* Bottom Minimap Area */
-.minimap-area {
-  flex: 0 0 20%; /* Exactly 20% height */
-  min-height: 80px; /* Ensure it doesn't get squished */
-  background-color: var(--color-surface);
-  border-top: 1px solid var(--color-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.minimap-placeholder {
-  text-align: center;
-  color: var(--color-tertiary);
-  width: 100%;
-  height: 100%;
-  border: 1px dashed var(--color-tertiary);
-  border-radius: 8px;
   display: flex;
   flex-direction: column;
   justify-content: center;

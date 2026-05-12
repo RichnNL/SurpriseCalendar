@@ -1,6 +1,19 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useCalendarStore } from '../../../stores/calendar'
+import SelectCalendarModal from './SelectCalendarModal.vue'
+
+const calendarStore = useCalendarStore()
+const showModal = ref(false)
+</script>
+
 <template>
-  <div class="action-placeholder">
-    Select Calendar ▾
+  <div>
+    <div class="action-placeholder" @click="showModal = true">
+      {{ calendarStore.activeCalendar?.name || 'Select Calendar' }} ▾
+    </div>
+
+    <SelectCalendarModal v-if="showModal" @close="showModal = false" />
   </div>
 </template>
 

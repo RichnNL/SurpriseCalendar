@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 import { supabase } from '../supabase'
 
 const router = createRouter({
@@ -8,7 +7,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView,
+      component: () => import('../views/Home/HomeView.vue'),
       meta: { requiresAuth: true }
     },
     {
@@ -20,13 +19,13 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: () => import('../views/LoginView.vue'),
+      component: () => import('../views/Login/LoginView.vue'),
       meta: { requiresGuest: true }
     },
     {
       path: '/signup',
       name: 'signup',
-      component: () => import('../views/SignupView.vue'),
+      component: () => import('../views/Signup/SignupView.vue'),
       meta: { requiresGuest: true }
     }
   ],

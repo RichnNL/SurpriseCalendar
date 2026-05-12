@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { supabase } from '../supabase'
-import AuthHeader from '../components/AuthHeader.vue'
+import { supabase } from '../../supabase'
+import AuthHeader from '../../components/AuthHeader.vue'
+
+import SignupUsernameInput from './components/SignupUsernameInput.vue'
+import SignupEmailInput from './components/SignupEmailInput.vue'
+import SignupPasswordInput from './components/SignupPasswordInput.vue'
+import SignupAgeCheckbox from './components/SignupAgeCheckbox.vue'
 
 const router = useRouter()
 const username = ref('')
@@ -109,57 +114,18 @@ async function handleSignUp() {
       <p class="auth-subtitle">Join us to get started</p>
 
       <form @submit.prevent="handleSignUp">
-        <div class="form-group">
-          <label class="form-label" for="username">Username</label>
-          <input
-            id="username"
-            v-model="username"
-            type="text"
-            placeholder="Enter a username"
-            required
-            minlength="3"
-            maxlength="12"
-          />
-          <div style="font-size: 0.85rem; margin-top: 0.25rem; min-height: 1.2rem;">
-            <span v-if="isChecking" style="color: var(--color-text-muted);">Checking availability...</span>
-            <span v-else-if="usernameError" style="color: #ff4d4f;">{{ usernameError }}</span>
-            <span v-else-if="isUsernameAvailable" style="color: #52c41a;">Username is available!</span>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="email">Email</label>
-          <input
-            id="email"
-            v-model="email"
-            type="email"
-            placeholder="you@example.com"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="password">Password</label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            placeholder="••••••••"
-            required
-            minlength="6"
-          />
-        </div>
-
-        <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;">
-          <input
-            id="isOver18"
-            v-model="isOver18"
-            type="checkbox"
-            required
-            style="width: auto; margin-bottom: 0;"
-          />
-          <label class="form-label" for="isOver18" style="margin-bottom: 0;">I confirm that I am 18 years or older.</label>
-        </div>
+        <SignupUsernameInput 
+          v-model="username" 
+          :isChecking="isChecking" 
+          :usernameError="usernameError" 
+          :isUsernameAvailable="isUsernameAvailable" 
+        />
+        
+        <SignupEmailInput v-model="email" />
+        
+        <SignupPasswordInput v-model="password" />
+        
+        <SignupAgeCheckbox v-model="isOver18" />
 
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
 

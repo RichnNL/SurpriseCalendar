@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import UserProfileMenu from '../components/UserProfileMenu.vue'
-import SwitchProfileDropdown from '../components/SwitchProfileDropdown.vue'
-import SelectCalendarDropdown from '../components/SelectCalendarDropdown.vue'
+import UserProfileMenu from './components/UserProfileMenu.vue'
+import SwitchProfileDropdown from './components/SwitchProfileDropdown.vue'
+import SelectCalendarDropdown from './components/SelectCalendarDropdown.vue'
 </script>
 
 <template>

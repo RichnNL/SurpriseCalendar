@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { supabase } from '../supabase'
-import AuthHeader from '../components/AuthHeader.vue'
+import { supabase } from '../../supabase'
+import AuthHeader from '../../components/AuthHeader.vue'
+
+import LoginEmailInput from './components/LoginEmailInput.vue'
+import LoginPasswordInput from './components/LoginPasswordInput.vue'
 
 const router = useRouter()
 const email = ref('')
@@ -38,29 +41,8 @@ async function handleLogin() {
       <p class="auth-subtitle">Sign in to your account</p>
 
       <form @submit.prevent="handleLogin">
-        <div class="form-group">
-          <label class="form-label" for="email">Email</label>
-          <input
-            id="email"
-            v-model="email"
-            type="email"
-            placeholder="you@example.com"
-            required
-            autocomplete="email"
-          />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="password">Password</label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            placeholder="••••••••"
-            required
-            autocomplete="current-password"
-          />
-        </div>
+        <LoginEmailInput v-model="email" />
+        <LoginPasswordInput v-model="password" />
 
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
 

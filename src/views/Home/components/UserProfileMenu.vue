@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useAuthStore } from '../stores/auth'
+import { useAuthStore } from '../../../stores/auth'
 import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
@@ -16,7 +16,7 @@ async function handleSignOut() {
 <template>
   <div class="user-menu-container">
     <div class="user-info" @click="isProfileMenuOpen = !isProfileMenuOpen">
-      <img src="../assets/avatar.png" alt="User Avatar" class="avatar" />
+      <img src="../../../assets/avatar.png" alt="User Avatar" class="avatar" />
       <span class="greeting">Hello, {{ authStore.user?.user_metadata?.username || 'User' }}</span>
     </div>
     
